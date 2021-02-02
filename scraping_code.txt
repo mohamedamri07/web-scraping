@@ -1,0 +1,73 @@
+# importing packages
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import openpyxl
+
+
+
+# listes of variables to extract
+price_list=[]
+name_car_list = []
+distance = []
+t_carburant = []
+list_0 = []
+# extracting data from each page(20 pages in our case)
+for i in range(21) :
+    url = "https://www.autoscout24.fr/lst/?sort=standard&desc=0&offer=D%2CJ%2CO%2CU&ustate=N%2CU&size=20&page="+str(i)+"&cy=F&atype=C&fc=3&qry=&"
+    response = requests.get(url)
+    if response.ok:
+        soup = BeautifulSoup(response.text,'lxml')
+        price = soup.find_all('span',class_ = "cldt-price sc-font-xl sc-font-bold")
+        name_voiture = soup.find_all('h2',class_ ="cldt-summary-makemodel sc-font-bold sc-ellipsis")
+        kilometrage = soup.find_all('div',class_="cldt-summary-vehicle-data")
+        type_carburant = soup.find_all('li',class_="summary_item_no_bottom_line")
+        
+        for p in price:
+            price_list.append(p.text.strip())
+            
+        for n in name_voiture:
+            name_car_list.append(n.text.strip())
+        for k in kilometrage:
+            distance.append(k.li.text.strip())
+        
+        for i in range(0,len(type_carburant),3):
+            list_0.append((type_carburant[i].text.strip()))    
+            
+            
+            
+            
+  # concatinating listes into one dataframe          
+price_name = pd.DataFrame(
+    {'name': name_car_list,
+     'price': price_list,
+     'KM': distance,
+     'type_c':list_0
+     
+     
+    }) 
+# exporting results to excel file 
+writer = pd.ExcelWriter('voiture22.xlsx')
+
+price_name.to_excel(writer)
+
+writer.save()
+        
+            
+            
+
+            
+        
+    
+       
+    
+       
+       
+            
+        
+            
+        
+        
+
+
+   
